@@ -37,6 +37,39 @@ VALUES(4, 'user04', 'pass04', '사용자', '남', 'user04@iei.com', 40);
 -- ORA-02291: integrity constraint (KH.GRADE_CODE_FK) violated - parent key not found
 
 
+
+-- 제약조건 걸려있는 부모테이블 레코드 지우기
+SELECT GRADE_CODE, GRADE_NAME FROM USER_GRADE;
+DELETE FROM USER_GRADE
+WHERE GRADE_CODE = 10;
+SELECT * FROM USER_FOREIGNKEY;
+-- ORA-02292: integrity constraint (KH.GRADE_CODE_FK) violated - child record found
+-- 외래키(자식테이블)가 참조하는 부모테이블 컬럼데이터는 기본적으로 지워지지 않는다. 
+-- 삭제 옵션 2가지를 이용해 지우는 방법이 있다.
+-- 1. ON DELETE SET NULL; → 부모테이블 데이터 지우고 자식테이블 데이터는 NULL로 바꿔줌
+-- 2. ON DELETE CASCADE; → 부모테이블 데이터 지우고 자식테이블 데이터도 지워줌
+ALTER TABLE USER_FOREIGNKEY
+DROP CONSTRAINT GRADE_CODE_FK;
+-- Table USER_FOREIGNKEY이(가) 변경되었습니다.
+COMMIT;
+-- 커밋 완료.
+ROLLBACK;
+-- 롤백 완료.
+ALTER TABLE USER_FOREIGNKEY
+ADD CONSTRAINT GRADE_CODE_FK FOREIGN KEY(GRADE_CODE) REFERENCES USER_GRADE(GRADE_CODE)
+ON DELETE SET NULL;
+
+ALTER TABLE USER_FOREIGNKEY
+ADD CONSTRAINT GRADE_CODE_FK FOREIGN KEY(GRADE_CODE) REFERENCES USER_GRADE(GRADE_CODE)
+ON DELETE CASCADE;
+
+-- Table USER_FOREIGNKEY이(가) 변경되었습니다.
+SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE
+FROM USER_CONSTRAINTS
+WHERE TABLE_NAME='USER_FOREIGNKEY';
+
+
+
 -- 별칭 표시 "" AS를 쓰지 않아도 됨
 SELECT EMP_NAME, SALARY, SALARY*12 "연봉(보너스 미포함)"
     , BONUS, (SALARY*BONUS + SALARY*12) AS "연봉(보너스 포함)"
