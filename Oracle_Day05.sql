@@ -76,13 +76,62 @@ ORDER BY 1;
 
 --@실습문제
 --1. EMPLOYEE 테이블에서 직급이 J1을 제외하고, 직급별 사원수 및 평균급여를 출력하세요.
+SELECT JOB_CODE, COUNT(JOB_CODE), AVG(SALARY)
+FROM EMPLOYEE
+WHERE JOB_CODE <> 'J1'
+-- WHERE JOB_CODE != 'J1
+GROUP BY JOB_CODE;
 
-
---2. EMPLOYEE테이블에서 직급이 J1을 제외하고,  입사년도별 인원수를 조회해서, 입사년 기준으로 오름차순 정렬하세요.
+--2. EMPLOYEE테이블에서 직급이 J1을 제외하고, 입사년도별 인원수를 조회해서, 입사년 기준으로 오름차순 정렬하세요.
+SELECT EXTRACT(YEAR FROM HIRE_DATE) COUNT(*)
+FROM EMPLOYEE
+WHERE JOB_CODE <> 'J1'
+ORDER BY EXTRACT(YEAR FROM HIRE_DATE)
+GROUP BY 1 ASC;
+-- 1번 컬럼에 대해 오름차순
 
 --3. [EMPLOYEE] 테이블에서 EMP_NO의 8번째 자리가 1, 3 이면 '남', 2, 4 이면 '여'로 결과를 조회하고,
 -- 성별별 급여의 평균(정수처리), 급여의 합계, 인원수를 조회한 뒤 인원수로 내림차순을 정렬 하시오
+SELECT DECODE(SUBSTR(EMP_NO, 8, 1), '1', '남', '2', '여') "성별"
+, FLOOR(AVG(SALARY)), SUM(SALARY), COUNT(*) "인원수"
+FROM EMPLOYEE
+GROUP BY DECODE(SUBSTR(EMP_NO, 8, 1), '1', '남', '2', '여')
+ORDER BY 4 DESC;
+-- ORDER BY "인원수" DESC;
 
 --4. 부서내 성별 인원수를 구하세요.
+SELECT DECODE(SUBSTR(EMP_NO, 8, 1), '1', '남', '2', '여') "성별", COUNT(*) "인원수"
+FROM EMPLOYEE
+GROUP BY DECODE(SUBSTR(EMP_NO, 8, 1), '1', '남', '2', '여');
 
 --5. 부서별 급여 평균이 3,000,000원(버림적용) 이상인  부서들에 대해서 부서명, 급여평균을 출력하세요.
+SELECT DEPT_CODE, FLOOR(AVG(SALARY))
+FROM EMPLOYEE
+GROUP BY DEPT_CODE;
+HAVING FLOOR(AVG(SALARY)) >= 3000000;
+
+-- # HAVING절
+-- 그룹함수로 값을 구해온 그룹에 대해 조건을 설정할때는 HAVING절에 기술함 (WHERE절 사용불가)
+
+
+--@실습문제
+--1. 부서별 인원이 5명보다 많은 부서와 인원수를 출력하세요.
+SELECT DEPT_CODE, COUNT(*)
+FROM EMPLOYEE
+GROUP BY DEPT_CODE
+HAVING COUNT(*) > 5;
+
+--2. 부서별내 직급별 인원수가 3명이상인 직급의 부서코드, 직급코드, 인원수를 출력하세요.
+SELECT DEPT_CODE, COUNT(*)
+FROM EMPLOYEE
+GROUP BY DEPT_CODE, JOB_CODE
+HAVING COUNT(*) >= 3;
+ORDER BY 1 DESC;
+
+--3. 관리하는 사원이 2명 이상인 매니저 아이디와 관리하는 사원수를 출력하세요.
+SELECT EMP_NAME, MANAGER_ID
+FROM EMPLOYEE
+GROUP BY MANAGER_ID
+HAVING COUNT(*) >= 2 AND MANAGER_ID IS NOT NULL
+ORDER BY 1;
+
